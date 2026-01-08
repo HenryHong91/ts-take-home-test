@@ -1,16 +1,16 @@
 import { Trash2Icon } from "lucide-react";
 import { cx } from "../../lib/cx.ts";
 import styles from "./insights.module.css";
-import type { Insight } from "../../schemas/insight.ts";
+import type { Insight } from "../../../../lib/schemas/insight.ts";
+import { toLocal } from "../../utils/dateConverter.ts";
 
 type InsightsProps = {
   insights: Insight[];
+  onDelete: (id: number) => void;
   className?: string;
 };
 
-export const Insights = ({ insights, className }: InsightsProps) => {
-  const deleteInsight = () => undefined;
-
+export const Insights = ({ insights, onDelete, className }: InsightsProps) => {
   return (
     <div className={cx(className)}>
       <h1 className={styles.heading}>Insights</h1>
@@ -20,12 +20,14 @@ export const Insights = ({ insights, className }: InsightsProps) => {
             insights.map(({ id, text, date, brandId }) => (
               <div className={styles.insight} key={id}>
                 <div className={styles["insight-meta"]}>
-                  <span>{brandId}</span>
+                  <span>Brand ID: {brandId}</span>
                   <div className={styles["insight-meta-details"]}>
-                    <span>{date.toString()}</span>
+                    {/* Convert to local time */}
+                    <span>{toLocal(date)}</span>
                     <Trash2Icon
                       className={styles["insight-delete"]}
-                      onClick={deleteInsight}
+                      onClick={() =>
+                        onDelete(id)}
                     />
                   </div>
                 </div>

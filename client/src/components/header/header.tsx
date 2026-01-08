@@ -2,10 +2,15 @@ import { useState } from "react";
 import { Button } from "../button/button.tsx";
 import styles from "./header.module.css";
 import { AddInsight } from "../add-insight/add-insight.tsx";
+import type { CreateInsightProp } from "../../../../lib/schemas/insight.ts";
 
 export const HEADER_TEXT = "Suit Tracker Insights";
 
-export const Header = () => {
+type HeaderProps = {
+  onAdd: (payload: CreateInsightProp) => Promise<void>;
+};
+
+export const Header = ({ onAdd }: HeaderProps) => {
   const [addInsightOpen, setAddInsightOpen] = useState(false);
 
   return (
@@ -21,6 +26,7 @@ export const Header = () => {
         </div>
       </header>
       <AddInsight
+        onAdd={onAdd}
         open={addInsightOpen}
         onClose={() => setAddInsightOpen(false)}
       />
