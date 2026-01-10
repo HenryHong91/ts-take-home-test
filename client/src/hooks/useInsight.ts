@@ -30,13 +30,13 @@ const useApiState = <T>() => {
       try {
         const result = await action();
         setData(result);
-        return { ok: true, data: result }; // Explicit success object
+        return { ok: true, data: result };
       } catch (err) {
         const message = err instanceof Error
           ? err.message
           : "An unexpected error occurred.";
         setError(message);
-        return { ok: false, error: message }; // Explicit error object
+        return { ok: false, error: message };
       } finally {
         setLoading(false);
       }
