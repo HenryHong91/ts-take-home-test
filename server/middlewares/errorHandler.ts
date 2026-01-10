@@ -3,16 +3,10 @@ import { ZodError } from "zod";
 import type { AppError } from "../utils/errors.ts";
 
 /**
- * Type guard to check if the error is an AppError
+ * Type guard for AppError
  */
-function isAppError(err: unknown): err is AppError {
-  return (
-    typeof err === "object" &&
-    err !== null &&
-    "isAppError" in err &&
-    err.isAppError === true
-  );
-}
+const isAppError = (err: unknown): err is AppError =>
+  !!err && typeof err === "object" && "isAppError" in err;
 
 export const errorHandler = async (
   ctx: Context,
@@ -21,36 +15,31 @@ export const errorHandler = async (
   try {
     await next();
   } catch (err: unknown) {
-    let status = 500;
+    let statusCode = 500;
     let message = "Internal Server Error";
-    let details = null;
+    let details: unknown = null;
 
-    // 1. Handle functional errors (AppError)
-    if (isAppError(err)) {
-      status = err.status;
+    if (isAppError(err) || isHttpError(err)) {
+      statusCode = err.status;
       message = err.message;
-    } // 2. Handle Zod validation errors
-    else if (err instanceof ZodError) {
-      status = 400;
+    } else if (err instanceof ZodError) {
+      statusCode = 400;
       message = "Validation Failed";
       details = err.errors.map((e) => ({
         path: e.path.join("."),
         message: e.message,
       }));
-    } // 3. Handle Oak's internal HTTP errors
-    else if (isHttpError(err)) {
-      status = err.status;
-      message = err.message;
-    } // 4. Handle generic errors
-    else if (err instanceof Error) {
+    } else if (err instanceof Error) {
       message = err.message;
     }
 
-    console.error(`[ERROR ${status}]: ${message}`);
+    // 2. Log error (Observability)
+    console.error(`[ERROR ${statusCode}]: ${message}`);
 
-    ctx.response.status = status;
+    // 3. Set response
+    ctx.response.status = statusCode;
     ctx.response.body = {
-      statusCode: status,
+      statusCode,
       message,
       details,
       data: null,
