@@ -25,7 +25,7 @@ export const getAllInsights = async () => {
 export const getSingleInsights = async (id: InsightId) => {
   // Runtime validation for ID
   const validatedId = IdSchema.parse(id);
-  //Enum check.
+
   const props = {
     url: `/api/insights/${validatedId}`,
     key: "Get Single Insights",
