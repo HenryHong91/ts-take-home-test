@@ -50,7 +50,7 @@ export const errorHandler = async (
 
     ctx.response.status = status;
     ctx.response.body = {
-      status: false,
+      statusCode: status,
       message,
       details,
       data: null,

@@ -6,6 +6,7 @@ import { createTable } from "./tables/insights.ts";
 import { insightService } from "./services/insightService.ts";
 import { validateCreateInsight, validateId } from "./utils/validator.ts";
 import { errorHandler } from "./middlewares/errorHandler.ts";
+import { HttpStatus } from "../lib/schemas/insight.ts";
 
 console.log("Loading configuration");
 
@@ -18,6 +19,7 @@ console.log(`Opening SQLite database at ${dbFilePath}`);
 
 await Deno.mkdir(path.dirname(dbFilePath), { recursive: true });
 const db = new Database(dbFilePath);
+
 db.exec(createTable);
 
 const service = insightService(db);
@@ -37,7 +39,7 @@ router.get("/_health", (ctx: oak.Context) => {
 // [GET] Retrieve all insights
 router.get("/insights", async (ctx: oak.Context) => {
   ctx.response.body = {
-    status: true,
+    statusCode: HttpStatus.Ok,
     message: "Success",
     data: await service.getAll(),
   };
@@ -47,7 +49,11 @@ router.get("/insights", async (ctx: oak.Context) => {
 router.get("/insights/:id", async (ctx: oak.RouterContext<"/insights/:id">) => {
   const id = validateId(ctx.params.id);
   const data = await service.getById(id);
-  ctx.response.body = { status: true, message: "Success", data: [data] };
+  ctx.response.body = {
+    statusCode: HttpStatus.Ok,
+    message: "Success",
+    data: [data],
+  };
 });
 
 // [POST] Create an insight
@@ -55,9 +61,12 @@ router.post("/insights/create", async (ctx: oak.Context) => {
   const rawBody = await ctx.request.body.json();
   const validatedData = validateCreateInsight(rawBody);
   const result = await service.create(validatedData);
-
-  ctx.response.status = 201;
-  ctx.response.body = { status: true, message: "Created", data: [result] };
+  ctx.response.status = HttpStatus.Created as number;
+  ctx.response.body = {
+    statusCode: HttpStatus.Created,
+    message: "Created",
+    data: [result],
+  };
 });
 
 // [DELETE] Delete an insight
@@ -66,7 +75,11 @@ router.delete(
   async (ctx: oak.RouterContext<"/insights/:id">) => {
     const id = validateId(ctx.params.id);
     const result = await service.remove(id);
-    ctx.response.body = { status: true, message: "Deleted", data: [result] };
+    ctx.response.body = {
+      statusCode: HttpStatus.Ok,
+      message: "Deleted",
+      data: [result],
+    };
   },
 );
 

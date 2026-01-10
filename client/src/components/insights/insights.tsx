@@ -20,7 +20,7 @@ export const Insights = ({ insights, onDelete, className }: InsightsProps) => {
             insights.map(({ id, text, date, brandId }) => (
               <div className={styles.insight} key={id}>
                 <div className={styles["insight-meta"]}>
-                  <span>Brand ID: {brandId}</span>
+                  <span>Brand {brandId}</span>
                   <div className={styles["insight-meta-details"]}>
                     {/* Convert to local time */}
                     <span>{toLocal(date)}</span>

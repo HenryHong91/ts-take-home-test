@@ -3,7 +3,6 @@ import {
   createInsights,
   deleteInsights,
   getAllInsights,
-  getSingleInsights,
 } from "../services/insightAPIs.ts";
 import type {
   CreateInsightProp,
@@ -12,31 +11,32 @@ import type {
 } from "../../../lib/schemas/insight.ts";
 
 /**
- * Custom hook for managing Insight data and API interactions.
- * Handles loading state, error handling, and data updates.
+ * Type for standardizing API call results.
+ * This improves visibility by making the success/failure state explicit.
  */
-export const useInsight = () => {
-  const [data, setData] = useState<InsightAPIRes | null>(null);
+export type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+const useApiState = <T>() => {
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Common fetch handler
-   * Manages loading/error states and updates data.
-   */
   const baseFetch = useCallback(
-    async (action: () => Promise<InsightAPIRes>) => {
+    async (action: () => Promise<T>): Promise<ApiResult<T>> => {
       setLoading(true);
       setError(null);
       try {
         const result = await action();
         setData(result);
-        return true;
+        return { ok: true, data: result }; // Explicit success object
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "An unexpected error occurred.",
-        );
-        return false;
+        const message = err instanceof Error
+          ? err.message
+          : "An unexpected error occurred.";
+        setError(message);
+        return { ok: false, error: message }; // Explicit error object
       } finally {
         setLoading(false);
       }
@@ -44,18 +44,29 @@ export const useInsight = () => {
     [],
   );
 
-  /** Fetch all insights */
-  const fetchAll = () => baseFetch(() => getAllInsights());
+  return { data, loading, error, baseFetch };
+};
 
-  /** Fetch a single insight by ID */
-  const fetchSingle = (id: InsightId) => baseFetch(() => getSingleInsights(id));
+export const useInsights = () => {
+  const { data, loading, error, baseFetch } = useApiState<InsightAPIRes>();
+  const fetchAll = useCallback(() => baseFetch(() => getAllInsights()), [
+    baseFetch,
+  ]);
 
-  /** Create a new insight */
+  return { data, loading, error, fetchAll };
+};
+
+export const useCreateInsight = () => {
+  const { loading, error, baseFetch } = useApiState<InsightAPIRes>();
   const create = (payload: CreateInsightProp) =>
     baseFetch(() => createInsights(payload));
 
-  /** Remove an insight by ID */
+  return { create, loading, error };
+};
+
+export const useDeleteInsight = () => {
+  const { loading, error, baseFetch } = useApiState<InsightAPIRes>();
   const remove = (id: InsightId) => baseFetch(() => deleteInsights(id));
 
-  return { data, loading, error, fetchAll, fetchSingle, create, remove };
+  return { remove, loading, error };
 };

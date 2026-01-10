@@ -1,6 +1,29 @@
 import { z } from "zod";
 
 /**
+ * Common HTTP Status Codes
+ */
+export enum HttpStatus {
+  Ok = 200,
+  Created = 201,
+  BadRequest = 400,
+  Unauthorized = 401,
+  Forbidden = 403,
+  NotFound = 404,
+  InternalServerError = 500,
+}
+
+/**
+ * Common HTTP Methods
+ */
+export enum HttpMethod {
+  Get = "GET",
+  Post = "POST",
+  Put = "PUT",
+  Delete = "DELETE",
+}
+
+/**
  * Insight Model
  */
 export const Insight = z.object({
@@ -38,8 +61,9 @@ export type CreateInsightProp = z.infer<typeof CreateInsightSchema>;
 /**
  * Common API response schema
  */
+// to fix
 export const InsightAPIRes = z.object({
-  status: z.boolean(),
+  statusCode: z.number().int(),
   message: z.string(),
   data: z.union([InsightArraySchema, z.null()]),
 });

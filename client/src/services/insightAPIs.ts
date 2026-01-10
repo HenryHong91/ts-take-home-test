@@ -2,7 +2,11 @@ import type {
   CreateInsightProp,
   InsightId,
 } from "../../../lib/schemas/insight.ts";
-import { CreateInsightSchema, IdSchema } from "../../../lib/schemas/insight.ts";
+import {
+  CreateInsightSchema,
+  HttpMethod,
+  IdSchema,
+} from "../../../lib/schemas/insight.ts";
 import { insightFetcher } from "./insightFetcher.ts";
 
 /**
@@ -21,11 +25,13 @@ export const getAllInsights = async () => {
 export const getSingleInsights = async (id: InsightId) => {
   // Runtime validation for ID
   const validatedId = IdSchema.parse(id);
+  //Enum check.
   const props = {
     url: `/api/insights/${validatedId}`,
     key: "Get Single Insights",
   };
   const raw = await insightFetcher(props);
+
   return raw;
 };
 
@@ -38,7 +44,7 @@ export const createInsights = async (payloads: CreateInsightProp) => {
   const validatedPayload = CreateInsightSchema.parse(payloads);
 
   const options = {
-    method: "POST",
+    method: HttpMethod.Post,
     headers: {
       "Content-Type": "application/json",
     },
@@ -62,7 +68,7 @@ export const deleteInsights = async (id: InsightId) => {
   const validatedId = IdSchema.parse(id);
 
   const options = {
-    method: "DELETE",
+    method: HttpMethod.Delete,
     headers: {
       "Content-Type": "application/json",
     },
