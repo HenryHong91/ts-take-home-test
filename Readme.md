@@ -1,3 +1,50 @@
+## Henry Hong
+
+This project is organized with a simple layered structure to keep responsibilities clear and make the code easy to extend and reason about.
+
+### Frontend
+
+The frontend is divided into three layers to separate network concerns, business logic, and UI rendering.
+
+- **Network layer**  
+  Handles HTTP communication and network-level errors only.
+
+- **Service layer**  
+  Responsible for defining API requests (endpoint, headers, body), validating responses at runtime, and transforming data.  
+  This layer is independent from the UI and focuses on reuse.
+
+- **UI layer**  
+  Uses hooks to consume service data, manage loading and error states, and render errors in the UI.  
+  No direct network or data-fetching logic.
+
+### Backend
+
+The backend is structured to keep request handling explicit and predictable.
+
+- **Route**  
+  Receives requests, controls the flow, and returns responses.
+
+- **Validation**  
+  Validates incoming requests based on shared schemas.
+
+- **Service**  
+  Contains business logic and coordinates operations.
+
+- **Operation**  
+  Executes database queries and handles low-level data access concerns.
+
+- **Error handling**  
+  A centralized error middleware handles errors across all layers.
+
+### Shared Types
+
+Schemas are placed in a shared `lib` so both frontend and backend rely on the same source of truth for types and contracts.
+
+
+
+============================================================================================
+
+
 # Take-Home Test (TypeScript)
 
 This is a template for a take-home test. See the [Instructions][Instructions]
